@@ -1,0 +1,23 @@
+import pytest
+import skywalker
+from force.utils import ControllerNotReached
+from ..test_common import play_audio,widget_detail_popup
+
+
+TAG = 'PACE-980751'
+
+@skywalker.dalek_id('PACE-980751')
+@skywalker.description('TC - Three dots menu in the recording playback - Cancel')
+@pytest.mark.parametrize('some_simple_audios', [[TAG, 3, 5]], indirect=True)
+def pace_980751(android_connection, some_simple_audios):
+    audio = some_simple_audios[0]
+
+    play_audio(android_connection, 0.5, audio, default_widget_validation=True)
+    android_connection.audio_recorder.playback.open_three_dots_menu()
+    widget_detail_popup(android_connection)
+    android_connection.audio_recorder.playback.widget.bt_cancel.tap()
+
+    try:
+        android_connection.audio_recorder.playback.wait_controller()
+    except ControllerNotReached:
+        assert False, 'After press the cancel button did not return to playback screen'
